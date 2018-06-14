@@ -1,13 +1,13 @@
-package com.example.project.repositories;
+package com.ITtraining.project.repositories;
 
 import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.repository.CrudRepository;
 
-import com.example.project.entities.OfferEntity;
-import com.example.project.entities.UserEntity;
-import com.example.project.entities.VoucherEntity;
+import com.ITtraining.project.entities.OfferEntity;
+import com.ITtraining.project.entities.UserEntity;
+import com.ITtraining.project.entities.VoucherEntity;
 
 public interface VoucherRepository extends CrudRepository<VoucherEntity, Integer> {
 

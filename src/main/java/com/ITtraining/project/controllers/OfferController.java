@@ -1,5 +1,6 @@
-package com.example.project.controllers;
+package com.ITtraining.project.controllers;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -9,16 +10,20 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
-import com.example.project.entities.CategoryEntity;
-import com.example.project.entities.OfferEntity;
-import com.example.project.entities.UserEntity;
-import com.example.project.entitiesEnum.EOfferStatus;
-import com.example.project.entitiesEnum.EUserRole;
-import com.example.project.repositories.CategoryRepository;
-import com.example.project.repositories.OfferRepository;
-import com.example.project.repositories.UserRepository;
+import com.ITtraining.project.entities.CategoryEntity;
+import com.ITtraining.project.entities.OfferEntity;
+import com.ITtraining.project.entities.UserEntity;
+import com.ITtraining.project.entitiesEnum.EOfferStatus;
+import com.ITtraining.project.entitiesEnum.EUserRole;
+import com.ITtraining.project.repositories.CategoryRepository;
+import com.ITtraining.project.repositories.OfferRepository;
+import com.ITtraining.project.repositories.UserRepository;
+import com.ITtraining.project.services.BillDao;
+import com.ITtraining.project.services.FileHandler;
 
 @RestController
 @RequestMapping(value = "/api/v1/project/offers")
@@ -33,13 +38,19 @@ public class OfferController {
 	@Autowired
 	private UserRepository userRepo;
 
-	// vraca sve ponude
+	@Autowired
+	private FileHandler fileHandler;
+
+	@Autowired
+	private BillDao billDao;
+
+	// find all offers
 	@RequestMapping
 	public List<OfferEntity> getAllOffers() {
 		return (List<OfferEntity>) offerRepo.findAll();
 	}
 
-	// dodavanje nove ponude
+	// add new offer
 	@RequestMapping(method = RequestMethod.POST, value = "/{categoryId}/seller/{sellerId}")
 	public OfferEntity addNewOffer(@RequestBody OfferEntity newOffer, @PathVariable Integer categoryId,
 			@PathVariable Integer sellerId) {
@@ -58,7 +69,6 @@ public class OfferController {
 		newOffer.setOfferCreated(new Date());
 		newOffer.setOfferExpires(calendar.getTime());
 		newOffer.setOfferStatus(EOfferStatus.WAIT_FOR_APPROVING);
-
 		newOffer.setSeller(userEntity);
 
 		if (categoryEntity != null) {
@@ -68,7 +78,7 @@ public class OfferController {
 		return offerRepo.save(newOffer);
 	}
 
-	// izmena postojece ponude
+	// modify an existing offer
 	@RequestMapping(value = "/{id}/category/{categoryId}", method = RequestMethod.PUT)
 	public OfferEntity updateOffer(@PathVariable Integer id, @RequestBody OfferEntity offer,
 			@PathVariable Integer categoryId) {
@@ -119,13 +129,12 @@ public class OfferController {
 			}
 
 			return offerRepo.save(offerEntity);
-
 		}
 
 		return null;
 	}
 
-	// brisanje ponude
+	// delete offer
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	public OfferEntity deleteOffer(@PathVariable Integer id) {
 
@@ -140,20 +149,25 @@ public class OfferController {
 		return null;
 	}
 
-	// vraca ponudu po Id-u
+	// find offer by Id
 	@RequestMapping(value = "/{Id}")
 	public OfferEntity getOfferById(@PathVariable Integer Id) {
 		return offerRepo.findById(Id).get();
 	}
 
-	// promena statusa ponude
+	// change offer status
 	@RequestMapping(value = "/changeOffer/{id}/status/{status}", method = RequestMethod.PUT)
 	public OfferEntity updateOfferStatus(@PathVariable Integer id, @PathVariable String status) {
 
 		if (offerRepo.existsById(id) && status != null) {
 
 			OfferEntity offerEntity = offerRepo.findById(id).get();
-			offerEntity.setOfferStatus(EOfferStatus.valueOf(status.toUpperCase()));
+			EOfferStatus offerStatus = EOfferStatus.valueOf(status.toUpperCase());
+			offerEntity.setOfferStatus(offerStatus);
+
+			if (offerStatus.equals(EOfferStatus.EXPIRED)) {
+				billDao.cancelBillsForOffer(offerEntity);
+			}
 
 			return offerRepo.save(offerEntity);
 
@@ -162,12 +176,33 @@ public class OfferController {
 		return null;
 	}
 
-	// vraca one ponude cija je akcijska cena u zadatim granicama
+	// returns the offer whose action price is within the given limits
 	@RequestMapping(value = "/findByPrice/{lowerPrice}/and/{upperPrice}", method = RequestMethod.GET)
 	public List<OfferEntity> getOffersByActionPriceValue(@PathVariable Double lowerPrice,
 			@PathVariable Double upperPrice) {
 
 		return offerRepo.findByActionPriceBetween(lowerPrice, upperPrice);
+	}
+
+	// upload image for an existing offer
+	@RequestMapping(value = "/uploadImage/{offerId}", method = RequestMethod.POST)
+	public OfferEntity uploadImage(@PathVariable Integer offerId, @RequestParam("file") MultipartFile file) {
+
+		if (offerRepo.existsById(offerId)) {
+			OfferEntity offerEntity = offerRepo.findById(offerId).get();
+			String imagePath = null;
+
+			try {
+				imagePath = fileHandler.singleFileUpload(offerId, file);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			offerEntity.setImagePath(imagePath);
+			return offerEntity;
+		}
+
+		return null;
 	}
 
 }

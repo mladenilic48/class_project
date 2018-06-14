@@ -1,4 +1,4 @@
-package com.example.project.entities;
+package com.ITtraining.project.entities;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.example.project.entitiesEnum.EUserRole;
+import com.ITtraining.project.entitiesEnum.EUserRole;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

@@ -1,4 +1,4 @@
-package com.example.project.controllers;
+package com.ITtraining.project.controllers;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -11,17 +11,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.project.entities.OfferEntity;
-import com.example.project.entities.UserEntity;
-import com.example.project.entities.VoucherEntity;
-import com.example.project.entitiesEnum.EUserRole;
-import com.example.project.repositories.OfferRepository;
-import com.example.project.repositories.UserRepository;
-import com.example.project.repositories.VoucherRepository;
+import com.ITtraining.project.entities.OfferEntity;
+import com.ITtraining.project.entities.UserEntity;
+import com.ITtraining.project.entities.VoucherEntity;
+import com.ITtraining.project.entitiesEnum.EUserRole;
+import com.ITtraining.project.repositories.OfferRepository;
+import com.ITtraining.project.repositories.UserRepository;
+import com.ITtraining.project.repositories.VoucherRepository;
 
 @RestController
 @RequestMapping(value = "/api/v1/project/vouchers")
-public class VoucherControllers {
+public class VoucherController {
 
 	@Autowired
 	private VoucherRepository voucherRepo;
@@ -32,6 +32,7 @@ public class VoucherControllers {
 	@Autowired
 	private OfferRepository offerRepo;
 
+	// find all vouchers
 	@RequestMapping
 	public List<VoucherEntity> getVouchers() {
 		return (List<VoucherEntity>) voucherRepo.findAll();
@@ -62,6 +63,7 @@ public class VoucherControllers {
 		return voucherRepo.save(newVoucher);
 	}
 
+	// modify an existing voucher
 	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
 	public VoucherEntity updateVoucher(@PathVariable Integer id, @RequestBody VoucherEntity updatedEntity) {
 
@@ -78,6 +80,7 @@ public class VoucherControllers {
 		return voucherRepo.save(voucherEntity);
 	}
 
+	// delete voucher
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	public VoucherEntity deleteVoucher(@PathVariable Integer id) {
 
@@ -92,6 +95,7 @@ public class VoucherControllers {
 		return voucherEntity;
 	}
 
+	// find vouchers by buyer Id
 	@RequestMapping(value = "/findByBuyer/{buyerId}")
 	public List<VoucherEntity> getVouchersByUser(@PathVariable Integer buyerId) {
 
@@ -104,6 +108,7 @@ public class VoucherControllers {
 		return null;
 	}
 
+	// find vouchers by offer Id
 	@RequestMapping(value = "/findByOffer/{offerId}")
 	public List<VoucherEntity> getVouchersByOffer(@PathVariable Integer offerId) {
 
@@ -116,14 +121,11 @@ public class VoucherControllers {
 		return null;
 	}
 
+	// find non expired vouchers
 	@RequestMapping(value = "/findNonExpiredVoucher")
 	public List<VoucherEntity> getNonExpiredVouchers() {
 
 		return voucherRepo.findByExpirationDateGreaterThanEqual(new Date());
 	}
 
-	
-	
-	
-	
 }

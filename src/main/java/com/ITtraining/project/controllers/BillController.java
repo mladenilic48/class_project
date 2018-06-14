@@ -1,4 +1,4 @@
-package com.example.project.controllers;
+package com.ITtraining.project.controllers;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -13,15 +13,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.project.entities.BillEntity;
-import com.example.project.entities.CategoryEntity;
-import com.example.project.entities.OfferEntity;
-import com.example.project.entities.UserEntity;
-import com.example.project.entitiesEnum.EUserRole;
-import com.example.project.repositories.BillRepository;
-import com.example.project.repositories.CategoryRepository;
-import com.example.project.repositories.OfferRepository;
-import com.example.project.repositories.UserRepository;
+import com.ITtraining.project.entities.BillEntity;
+import com.ITtraining.project.entities.CategoryEntity;
+import com.ITtraining.project.entities.OfferEntity;
+import com.ITtraining.project.entities.UserEntity;
+import com.ITtraining.project.entitiesEnum.EUserRole;
+import com.ITtraining.project.repositories.BillRepository;
+import com.ITtraining.project.repositories.CategoryRepository;
+import com.ITtraining.project.repositories.OfferRepository;
+import com.ITtraining.project.repositories.UserRepository;
+import com.ITtraining.project.services.OfferDao;
+import com.ITtraining.project.services.VoucherDao;
 
 @RestController
 @RequestMapping(value = "/api/v1/project/bills")
@@ -34,19 +36,27 @@ public class BillController {
 	private OfferRepository offerRepo;
 
 	@Autowired
+	private OfferDao offerDao;
+
+	@Autowired
 	private UserRepository userRepo;
 
 	@Autowired
 	private CategoryRepository categoryRepo;
 
+	@Autowired
+	private VoucherDao voucherDao;
+
 	@Value(value = "${dateFormat}")
 	private String dateFormat;
 
+	// find all bills
 	@RequestMapping
 	public List<BillEntity> getBills() {
 		return (List<BillEntity>) billRepo.findAll();
 	}
 
+	// add new bill
 	@RequestMapping(value = "/{offerId}/buyer/{buyerId}", method = RequestMethod.POST)
 	public BillEntity addBill(@PathVariable Integer offerId, @PathVariable Integer buyerId,
 			@RequestBody BillEntity newBill) {
@@ -64,14 +74,12 @@ public class BillController {
 		newBill.setBillOffer(offerEntity);
 		newBill.setBillUser(buyer);
 
-		// zadatak 5.2
-		offerEntity.setAvailableOffers(offerEntity.getAvailableOffers() - 1);
-		offerEntity.setBoughtOffers(offerEntity.getBoughtOffers() + 1);
-		offerRepo.save(offerEntity);
+		offerDao.updateOffer(offerEntity, true);
 
 		return billRepo.save(newBill);
 	}
 
+	// modify an existing bill
 	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
 	public BillEntity updateBill(@PathVariable Integer id, @RequestBody BillEntity updatedBill) {
 
@@ -89,17 +97,18 @@ public class BillController {
 			billEntity.setPaymentMade(updatedBill.getPaymentMade());
 		}
 
-		// zadatak 5.3
+		if (billEntity.getPaymentMade()) {
+			voucherDao.createVoucher(billEntity);
+		}
+
 		if (billEntity.getPaymentCanceled()) {
-			OfferEntity offerEntity = offerRepo.findById(billEntity.getBillOffer().getId()).get();
-			offerEntity.setAvailableOffers(offerEntity.getAvailableOffers() + 1);
-			offerEntity.setBoughtOffers(offerEntity.getBoughtOffers() - 1);
-			offerRepo.save(offerEntity);
+			offerDao.updateOffer(updatedBill.getBillOffer(), false);
 		}
 
 		return billRepo.save(billEntity);
 	}
 
+	// delete bill
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	public BillEntity deleteBill(@PathVariable Integer id) {
 
@@ -114,6 +123,7 @@ public class BillController {
 		return billEntity;
 	}
 
+	// find bill by buyer
 	@RequestMapping(value = "/findByBuyer/{buyerId}", method = RequestMethod.GET)
 	public List<BillEntity> getCustomerBills(@PathVariable Integer buyerId) {
 
@@ -126,6 +136,7 @@ public class BillController {
 		return billRepo.findByBillUser(buyer);
 	}
 
+	// find bill by category
 	@RequestMapping(value = "/findByCategory/{categoryId}")
 	public List<BillEntity> getCategryBills(@PathVariable Integer categoryId) {
 
@@ -138,6 +149,7 @@ public class BillController {
 		return billRepo.findBybillOfferOfferCategory(categoryEntity);
 	}
 
+	// find by date period
 	@RequestMapping(value = "/findByDate/{startDate}/and/{endDate}")
 	public List<BillEntity> getBillsIntoIntervalDate(@PathVariable String startDate, @PathVariable String endDate)
 			throws ParseException {

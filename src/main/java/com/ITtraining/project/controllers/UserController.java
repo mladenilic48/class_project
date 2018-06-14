@@ -1,4 +1,4 @@
-package com.example.project.controllers;
+package com.ITtraining.project.controllers;
 
 import java.util.List;
 
@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.project.entities.UserEntity;
-import com.example.project.entitiesEnum.EUserRole;
-import com.example.project.repositories.UserRepository;
+import com.ITtraining.project.entities.UserEntity;
+import com.ITtraining.project.entitiesEnum.EUserRole;
+import com.ITtraining.project.repositories.UserRepository;
 
 @RestController
 @RequestMapping(value = "/api/v1/project/users")
@@ -21,19 +21,19 @@ public class UserController {
 	@Autowired
 	private UserRepository userRepo;
 
-	// vraca sve korisnike
+	// find all users
 	@RequestMapping
 	public List<UserEntity> getUsers() {
 		return (List<UserEntity>) userRepo.findAll();
 	}
 
-	// vraca korisnika po Id-u
+	// find user by Id
 	@RequestMapping(value = "/{Id}")
 	public UserEntity getUserById(@PathVariable Integer Id) {
 		return userRepo.findById(Id).get();
 	}
 
-	// dodavanje novog korisnika
+	// add new user
 	@RequestMapping(method = RequestMethod.POST)
 	public UserEntity addUser(@RequestBody UserEntity newUser) {
 
@@ -52,7 +52,7 @@ public class UserController {
 		return userRepo.save(newUser);
 	}
 
-	// izmena postojeceg korisnika
+	// modify an existing user
 	@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
 	public UserEntity updateUser(@PathVariable Integer id, @RequestBody UserEntity user) {
 
@@ -78,7 +78,7 @@ public class UserController {
 		return null;
 	}
 
-	// izmena atributa user_role postojeceg korisnika
+	// modify the user_role attribute of an existing user
 	@RequestMapping(value = "/change/{id}/role/{role}", method = RequestMethod.PUT)
 	public UserEntity updateUserRole(@PathVariable Integer id, @PathVariable String role) {
 
@@ -95,7 +95,7 @@ public class UserController {
 		return null;
 	}
 
-	// promena lozinke
+	// change user password
 	@RequestMapping(value = "/changePassword/{id}", method = RequestMethod.PUT)
 	public UserEntity updateUserPassword(@PathVariable Integer id, @RequestParam("oldPassword") String oldPassword,
 			@RequestParam("newPassword") String newPassword) {
@@ -114,7 +114,7 @@ public class UserController {
 		return null;
 	}
 
-	// brisanje korisnika
+	// delete user
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
 	public UserEntity deleteUser(@PathVariable Integer id) {
 
@@ -129,7 +129,7 @@ public class UserController {
 		return null;
 	}
 
-	// pretraga po korisnickom imenu
+	// find by username
 	@RequestMapping(value = "/by-username/{username}")
 	public UserEntity getByUserName(@PathVariable String username) {
 

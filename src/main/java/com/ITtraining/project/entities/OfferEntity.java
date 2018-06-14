@@ -1,4 +1,4 @@
-package com.example.project.entities;
+package com.ITtraining.project.entities;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,7 +16,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.example.project.entitiesEnum.EOfferStatus;
+import com.ITtraining.project.entitiesEnum.EOfferStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

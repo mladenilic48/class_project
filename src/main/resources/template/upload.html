@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<h1>Offer image upload</h1>
+
+<form method="POST" action="/project/offers/uploadImage" enctype="multipart/form-data">
+	<input type="number" name="offerId" /><br/><br/>
+    <input type="file" name="file" /><br/><br/>
+    <input type="submit" value="Submit" />
+</form>
+
+</body>
+</html>
