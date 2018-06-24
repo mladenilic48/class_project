@@ -199,6 +199,7 @@ public class OfferController {
 			}
 
 			offerEntity.setImagePath(imagePath);
+
 			return offerEntity;
 		}
 

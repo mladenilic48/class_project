@@ -27,6 +27,5 @@ public class ProjectApplication {
 		});
 
 		return tomcat;
-
 	}
 }

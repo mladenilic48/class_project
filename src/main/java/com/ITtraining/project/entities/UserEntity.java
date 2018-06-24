@@ -33,6 +33,7 @@ public class UserEntity {
 	@Column(name = "username")
 	private String username;
 	@Column(name = "password")
+	@JsonIgnore
 	private String password;
 	@Column(name = "email")
 	private String email;

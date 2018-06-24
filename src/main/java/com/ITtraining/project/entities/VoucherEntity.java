@@ -19,7 +19,7 @@ public class VoucherEntity {
 	@Column(name = "id")
 	private Integer id;
 
-	@Column(name = "expration_date")
+	@Column(name = "expiration_date")
 	private Date expirationDate;
 
 	@Column(name = "is_used")

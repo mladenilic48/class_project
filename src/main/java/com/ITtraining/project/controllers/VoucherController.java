@@ -38,6 +38,7 @@ public class VoucherController {
 		return (List<VoucherEntity>) voucherRepo.findAll();
 	}
 
+	// create new voucher
 	@RequestMapping(value = "/{offerId}/buyer/{buyerId}", method = RequestMethod.POST)
 	public VoucherEntity addVoucher(@PathVariable Integer offerId, @PathVariable Integer buyerId) {
 
