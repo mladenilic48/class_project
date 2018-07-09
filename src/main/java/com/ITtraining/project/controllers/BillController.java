@@ -58,9 +58,9 @@ public class BillController {
 
 	// add new bill
 	@RequestMapping(value = "/{offerId}/buyer/{buyerId}", method = RequestMethod.POST)
-	public BillEntity addBill(@PathVariable Integer offerId, @PathVariable Integer buyerId,
-			@RequestBody BillEntity newBill) {
+	public BillEntity addBill(@PathVariable Integer offerId, @PathVariable Integer buyerId) {
 
+		BillEntity newBill = new BillEntity();
 		OfferEntity offerEntity = offerRepo.findById(offerId).get();
 		UserEntity buyer = userRepo.findById(buyerId).get();
 

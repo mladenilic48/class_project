@@ -96,7 +96,7 @@ public class VoucherController {
 		return voucherEntity;
 	}
 
-	// find vouchers by buyer Id
+	// find vouchers by buyer
 	@RequestMapping(value = "/findByBuyer/{buyerId}")
 	public List<VoucherEntity> getVouchersByUser(@PathVariable Integer buyerId) {
 
@@ -109,7 +109,7 @@ public class VoucherController {
 		return null;
 	}
 
-	// find vouchers by offer Id
+	// find vouchers by offer
 	@RequestMapping(value = "/findByOffer/{offerId}")
 	public List<VoucherEntity> getVouchersByOffer(@PathVariable Integer offerId) {
 
