@@ -12,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class FileHandlerImpl implements FileHandler {
 
 	// Save the uploaded file to this folder
-	private static String UPLOADED_FOLDER = "D://temp//";
+	private static String UPLOADED_FOLDER = "D://Java//temp//";
 
 	@Override
 	public String singleFileUpload(Integer offerId, MultipartFile file) throws IOException {
@@ -22,7 +22,9 @@ public class FileHandlerImpl implements FileHandler {
 		}
 
 		try {
+
 			Path dir = Paths.get(UPLOADED_FOLDER + offerId.toString());
+			
 			if (!Files.exists(dir))
 				Files.createDirectories(dir);
 

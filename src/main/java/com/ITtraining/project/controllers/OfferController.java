@@ -176,7 +176,7 @@ public class OfferController {
 		return null;
 	}
 
-	// returns the offer whose action price is within the given limits
+	// returns the offers action price within the given limits
 	@RequestMapping(value = "/findByPrice/{lowerPrice}/and/{upperPrice}", method = RequestMethod.GET)
 	public List<OfferEntity> getOffersByActionPriceValue(@PathVariable Double lowerPrice,
 			@PathVariable Double upperPrice) {
@@ -189,11 +189,14 @@ public class OfferController {
 	public OfferEntity uploadImage(@PathVariable Integer offerId, @RequestParam("file") MultipartFile file) {
 
 		if (offerRepo.existsById(offerId)) {
+
 			OfferEntity offerEntity = offerRepo.findById(offerId).get();
 			String imagePath = null;
 
 			try {
+
 				imagePath = fileHandler.singleFileUpload(offerId, file);
+
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

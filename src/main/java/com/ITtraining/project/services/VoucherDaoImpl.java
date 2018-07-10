@@ -21,6 +21,7 @@ public class VoucherDaoImpl implements VoucherDao {
 
 	@Override
 	public VoucherEntity createVoucher(BillEntity bill) {
+
 		VoucherEntity voucher = new VoucherEntity();
 
 		Calendar cal = Calendar.getInstance();
@@ -33,7 +34,9 @@ public class VoucherDaoImpl implements VoucherDao {
 		voucher.setIsUsed(false);
 
 		try {
+			
 			emailService.sendTemplateMessage(voucher);
+		
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
