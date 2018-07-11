@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,12 +21,14 @@ import com.ITtraining.project.entities.BillEntity;
 import com.ITtraining.project.entities.CategoryEntity;
 import com.ITtraining.project.entities.OfferEntity;
 import com.ITtraining.project.entities.UserEntity;
+import com.ITtraining.project.entities.dto.ReportDTO;
 import com.ITtraining.project.entitiesEnum.EUserRole;
 import com.ITtraining.project.repositories.BillRepository;
 import com.ITtraining.project.repositories.CategoryRepository;
 import com.ITtraining.project.repositories.OfferRepository;
 import com.ITtraining.project.repositories.UserRepository;
 import com.ITtraining.project.security.Views;
+import com.ITtraining.project.services.BillDao;
 import com.ITtraining.project.services.OfferDao;
 import com.ITtraining.project.services.VoucherDao;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -36,6 +39,9 @@ public class BillController {
 
 	@Autowired
 	private BillRepository billRepo;
+
+	@Autowired
+	private BillDao billDao;
 
 	@Autowired
 	private OfferRepository offerRepo;
@@ -54,6 +60,8 @@ public class BillController {
 
 	@Value(value = "${dateFormat}")
 	private String dateFormat;
+
+	private final String dtf = "yyyy-MM-dd";
 
 	// find all public bills
 	@RequestMapping(value = "/public")
@@ -204,4 +212,22 @@ public class BillController {
 		}
 
 	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/generateReportByDate/{startDate}/and/{endDate}")
+	public ResponseEntity<?> generateReportByDate(@PathVariable @DateTimeFormat(pattern = dtf) Date startDate,
+			@PathVariable @DateTimeFormat(pattern = dtf) Date endDate) {
+
+		ReportDTO report = billDao.createReportByDate(startDate, endDate);
+		return new ResponseEntity<ReportDTO>(report, HttpStatus.OK);
+	}
+
+	@RequestMapping(method = RequestMethod.GET, value = "/generateReport/{startDate}/and/{endDate}/category/{categoryId}")
+
+	public ResponseEntity<?> generateReport(@PathVariable @DateTimeFormat(pattern = dtf) Date startDate,
+			@PathVariable @DateTimeFormat(pattern = dtf) Date endDate, @PathVariable Integer categoryId) {
+
+		ReportDTO report = billDao.createReportByCategoryAndDate(startDate, endDate, categoryId);
+		return new ResponseEntity<ReportDTO>(report, HttpStatus.OK);
+	}
+
 }
