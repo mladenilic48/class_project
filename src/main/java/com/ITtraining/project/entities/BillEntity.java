@@ -12,6 +12,11 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.ITtraining.project.security.Views;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+
 @Entity
 @Table(name = "bills")
 public class BillEntity {
@@ -19,23 +24,31 @@ public class BillEntity {
 	@Id
 	@GeneratedValue
 	@Column(name = "id")
+	@JsonView(Views.Public.class)
+	@JsonProperty("Id")
 	private Integer id;
 
 	@Column(name = "payment_made")
+	@JsonView(Views.Admin.class)
 	private Boolean paymentMade;
 
 	@Column(name = "payment_canceled")
+	@JsonView(Views.Admin.class)
 	private Boolean paymentCanceled;
 
 	@Column(name = "bill_created")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+	@JsonView(Views.Public.class)
 	private Date billCreated;
 
 	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	@JoinColumn(name = "billOffer")
+	@JsonView(Views.Private.class)
 	private OfferEntity billOffer;
 
 	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	@JoinColumn(name = "billUser")
+	@JsonView(Views.Private.class)
 	private UserEntity billUser;
 
 	public Integer getId() {

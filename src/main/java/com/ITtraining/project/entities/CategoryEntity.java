@@ -13,8 +13,11 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import com.ITtraining.project.security.Views;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 
 @Entity
 @Table(name = "categories")
@@ -24,12 +27,16 @@ public class CategoryEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "id")
+	@JsonView(Views.Public.class)
+	@JsonProperty("Id")
 	private Integer id;
 
 	@Column(name = "category_name")
+	@JsonView(Views.Public.class)
 	private String categoryName;
 
 	@Column(name = "category_description")
+	@JsonView(Views.Public.class)
 	private String categoryDescription;
 
 	@OneToMany(mappedBy = "offerCategory", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)

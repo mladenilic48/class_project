@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.ITtraining.project.controllers.util.RESTError;
 import com.ITtraining.project.entities.CategoryEntity;
 import com.ITtraining.project.entities.OfferEntity;
 import com.ITtraining.project.entities.UserEntity;
@@ -22,8 +25,10 @@ import com.ITtraining.project.entitiesEnum.EUserRole;
 import com.ITtraining.project.repositories.CategoryRepository;
 import com.ITtraining.project.repositories.OfferRepository;
 import com.ITtraining.project.repositories.UserRepository;
+import com.ITtraining.project.security.Views;
 import com.ITtraining.project.services.BillDao;
 import com.ITtraining.project.services.FileHandler;
+import com.fasterxml.jackson.annotation.JsonView;
 
 @RestController
 @RequestMapping(value = "/api/v1/project/offers")
@@ -46,20 +51,27 @@ public class OfferController {
 
 	// find all offers
 	@RequestMapping
-	public List<OfferEntity> getAllOffers() {
-		return (List<OfferEntity>) offerRepo.findAll();
+	@JsonView(Views.Public.class)
+	public ResponseEntity<?> getAllOffers() {
+		return new ResponseEntity<Iterable<OfferEntity>>(offerRepo.findAll(), HttpStatus.OK);
 	}
 
 	// add new offer
 	@RequestMapping(method = RequestMethod.POST, value = "/{categoryId}/seller/{sellerId}")
-	public OfferEntity addNewOffer(@RequestBody OfferEntity newOffer, @PathVariable Integer categoryId,
+	public ResponseEntity<?> addNewOffer(@RequestBody OfferEntity newOffer, @PathVariable Integer categoryId,
 			@PathVariable Integer sellerId) {
 
 		CategoryEntity categoryEntity = categoryRepo.findById(categoryId).get();
 		UserEntity userEntity = userRepo.findById(sellerId).get();
 
-		if (newOffer == null || userEntity == null || !userEntity.getUserRole().equals(EUserRole.ROLE_SELLER)) {
-			return null;
+		if (userEntity == null) {
+			return new ResponseEntity<RESTError>(new RESTError(1, "User with provided ID not found."),
+					HttpStatus.NOT_FOUND);
+		}
+
+		if (newOffer == null || !userEntity.getUserRole().equals(EUserRole.ROLE_SELLER)) {
+			return new ResponseEntity<RESTError>(new RESTError(2, "User with provided ID is not seller."),
+					HttpStatus.BAD_REQUEST);
 		}
 
 		Calendar calendar = Calendar.getInstance();
@@ -73,14 +85,17 @@ public class OfferController {
 
 		if (categoryEntity != null) {
 			newOffer.setOfferCategory(categoryEntity);
+		} else {
+			return new ResponseEntity<RESTError>(new RESTError(1, "Category with provided ID not found."),
+					HttpStatus.NOT_FOUND);
 		}
 
-		return offerRepo.save(newOffer);
+		return new ResponseEntity<OfferEntity>(offerRepo.save(newOffer), HttpStatus.OK);
 	}
 
 	// modify an existing offer
 	@RequestMapping(value = "/{id}/category/{categoryId}", method = RequestMethod.PUT)
-	public OfferEntity updateOffer(@PathVariable Integer id, @RequestBody OfferEntity offer,
+	public ResponseEntity<?> updateOffer(@PathVariable Integer id, @RequestBody OfferEntity offer,
 			@PathVariable Integer categoryId) {
 
 		if (offerRepo.existsById(id) && offer != null) {
@@ -88,11 +103,12 @@ public class OfferController {
 			OfferEntity offerEntity = offerRepo.findById(id).get();
 			CategoryEntity categoryEntity = categoryRepo.findById(categoryId).get();
 
-			if (offer.getOfferName() != null) {
+			if (offer.getOfferName() != null || !offer.getOfferName().equals(" ") || !offer.getOfferName().equals("")) {
 				offerEntity.setOfferName(offer.getOfferName());
 			}
 
-			if (offer.getOfferDescription() != null) {
+			if (offer.getOfferDescription() != null || !offer.getOfferDescription().equals(" ")
+					|| !offer.getOfferDescription().equals("")) {
 				offerEntity.setOfferDescription(offer.getOfferDescription());
 			}
 
@@ -128,36 +144,44 @@ public class OfferController {
 				offer.setOfferCategory(categoryEntity);
 			}
 
-			return offerRepo.save(offerEntity);
+			return new ResponseEntity<OfferEntity>(offerRepo.save(offerEntity), HttpStatus.OK);
 		}
 
-		return null;
+		return new ResponseEntity<RESTError>(new RESTError(1, "Offer with provided ID not found."),
+				HttpStatus.NOT_FOUND);
 	}
 
 	// delete offer
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-	public OfferEntity deleteOffer(@PathVariable Integer id) {
+	public ResponseEntity<?> deleteOffer(@PathVariable Integer id) {
 
 		if (offerRepo.existsById(id)) {
 
 			OfferEntity offerEntity = offerRepo.findById(id).get();
 			offerRepo.deleteById(id);
 
-			return offerEntity;
+			return new ResponseEntity<OfferEntity>(offerEntity, HttpStatus.OK);
 		}
 
-		return null;
+		return new ResponseEntity<RESTError>(new RESTError(1, "Offer with provided ID not found."),
+				HttpStatus.NOT_FOUND);
 	}
 
 	// find offer by Id
 	@RequestMapping(value = "/{Id}")
-	public OfferEntity getOfferById(@PathVariable Integer Id) {
-		return offerRepo.findById(Id).get();
+	public ResponseEntity<?> getOfferById(@PathVariable Integer Id) {
+
+		if (offerRepo.findById(Id).isPresent()) {
+			return new ResponseEntity<OfferEntity>(offerRepo.findById(Id).get(), HttpStatus.OK);
+		} else {
+			return new ResponseEntity<RESTError>(new RESTError(1, "Offer with provided ID not found."),
+					HttpStatus.NOT_FOUND);
+		}
 	}
 
 	// change offer status
 	@RequestMapping(value = "/changeOffer/{id}/status/{status}", method = RequestMethod.PUT)
-	public OfferEntity updateOfferStatus(@PathVariable Integer id, @PathVariable String status) {
+	public ResponseEntity<?> updateOfferStatus(@PathVariable Integer id, @PathVariable String status) {
 
 		if (offerRepo.existsById(id) && status != null) {
 
@@ -169,24 +193,26 @@ public class OfferController {
 				billDao.cancelBillsForOffer(offerEntity);
 			}
 
-			return offerRepo.save(offerEntity);
+			return new ResponseEntity<OfferEntity>(offerRepo.save(offerEntity), HttpStatus.OK);
 
 		}
 
-		return null;
+		return new ResponseEntity<RESTError>(new RESTError(1, "Offer with provided ID not found."),
+				HttpStatus.NOT_FOUND);
 	}
 
 	// returns the offers action price within the given limits
 	@RequestMapping(value = "/findByPrice/{lowerPrice}/and/{upperPrice}", method = RequestMethod.GET)
-	public List<OfferEntity> getOffersByActionPriceValue(@PathVariable Double lowerPrice,
+	public ResponseEntity<?> getOffersByActionPriceValue(@PathVariable Double lowerPrice,
 			@PathVariable Double upperPrice) {
 
-		return offerRepo.findByActionPriceBetween(lowerPrice, upperPrice);
+		return new ResponseEntity<List<OfferEntity>>(offerRepo.findByActionPriceBetween(lowerPrice, upperPrice),
+				HttpStatus.OK);
 	}
 
 	// upload image for an existing offer
 	@RequestMapping(value = "/uploadImage/{offerId}", method = RequestMethod.POST)
-	public OfferEntity uploadImage(@PathVariable Integer offerId, @RequestParam("file") MultipartFile file) {
+	public ResponseEntity<?> uploadImage(@PathVariable Integer offerId, @RequestParam("file") MultipartFile file) {
 
 		if (offerRepo.existsById(offerId)) {
 
@@ -203,10 +229,11 @@ public class OfferController {
 
 			offerEntity.setImagePath(imagePath);
 
-			return offerEntity;
+			return new ResponseEntity<String>("Image successfully uploaded", HttpStatus.OK);
 		}
 
-		return null;
+		return new ResponseEntity<RESTError>(new RESTError(1, "Offer with provided ID not found."),
+				HttpStatus.NOT_FOUND);
 	}
 
 }

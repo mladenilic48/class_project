@@ -17,8 +17,12 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.ITtraining.project.entitiesEnum.EOfferStatus;
+import com.ITtraining.project.security.Views;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 
 @Entity
 @Table(name = "offers")
@@ -28,44 +32,60 @@ public class OfferEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "id")
+	@JsonView(Views.Public.class)
+	@JsonProperty("Id")
 	private Integer id;
 
 	@Column(name = "available_offers")
+	@JsonView(Views.Public.class)
 	private Integer availableOffers;
 
 	@Column(name = "bought_offers")
+	@JsonView(Views.Public.class)
 	private Integer boughtOffers;
 
 	@Column(name = "offer_created")
+	@JsonView(Views.Public.class)
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
 	private Date offerCreated;
 
 	@Column(name = "offer_expires")
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+	@JsonView(Views.Public.class)
 	private Date offerExpires;
 
 	@Column(name = "offer_name")
+	@JsonView(Views.Public.class)
 	private String offerName;
 
 	@Column(name = "offer_description")
+	@JsonView(Views.Public.class)
 	private String offerDescription;
 
 	@Column(name = "image_path")
+	@JsonView(Views.Public.class)
 	private String imagePath;
 
 	@Column(name = "regular_price")
+	@JsonView(Views.Public.class)
 	private Double regularPrice;
 
 	@Column(name = "action_price")
+	@JsonView(Views.Public.class)
 	private Double actionPrice;
 
 	@Column(name = "offer_status")
+	@JsonView(Views.Public.class)
 	private EOfferStatus offerStatus;
 
 	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	@JoinColumn(name = "offerCategory")
+	@JsonView(Views.Public.class)
 	private CategoryEntity offerCategory;
 
 	@ManyToOne(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
 	@JoinColumn(name = "seller")
+	@JsonView(Views.Public.class)
 	private UserEntity seller;
 
 	@OneToMany(mappedBy = "billOffer", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)

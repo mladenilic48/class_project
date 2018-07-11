@@ -14,8 +14,11 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import com.ITtraining.project.entitiesEnum.EUserRole;
+import com.ITtraining.project.security.Views;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 
 @Entity
 @Table(name = "users")
@@ -25,25 +28,32 @@ public class UserEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Column(name = "id")
+	@JsonView(Views.Public.class)
+	@JsonProperty("Id")
 	private Integer id;
 
 	@Column(name = "first_name")
+	@JsonView(Views.Private.class)
 	private String firstName;
-	
+
 	@Column(name = "last_name")
+	@JsonView(Views.Private.class)
 	private String lastName;
-	
+
 	@Column(name = "username")
+	@JsonView(Views.Public.class)
 	private String username;
-	
+
 	@Column(name = "password")
 	@JsonIgnore
 	private String password;
-	
+
 	@Column(name = "email")
+	@JsonView(Views.Private.class)
 	private String email;
-	
+
 	@Column(name = "user_role")
+	@JsonView(Views.Admin.class)
 	private EUserRole userRole;
 
 	@OneToMany(mappedBy = "seller", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
