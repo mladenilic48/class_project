@@ -12,6 +12,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import com.ITtraining.project.security.Views;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -33,10 +35,12 @@ public class CategoryEntity {
 
 	@Column(name = "category_name")
 	@JsonView(Views.Public.class)
+	@NotNull (message = "Category name must be provided.")
 	private String categoryName;
 
 	@Column(name = "category_description")
 	@JsonView(Views.Public.class)
+	@Size(max=50, message= "Category description cannot be more than {max} characters long.")
 	private String categoryDescription;
 
 	@OneToMany(mappedBy = "offerCategory", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)

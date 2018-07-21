@@ -1,8 +1,14 @@
 package com.ITtraining.project.controllers;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ITtraining.project.controllers.util.RESTError;
+import com.ITtraining.project.custom_validator.UserCustomValidator;
 import com.ITtraining.project.entities.UserEntity;
 import com.ITtraining.project.entities.dto.UserDTO;
 import com.ITtraining.project.entitiesEnum.EUserRole;
@@ -24,6 +31,23 @@ public class UserController {
 
 	@Autowired
 	private UserRepository userRepo;
+
+	@Autowired
+	private UserCustomValidator userValidator;
+
+	@InitBinder
+	protected void initBinder(final WebDataBinder binder) {
+		binder.addValidators(userValidator);
+	}
+
+	private String createErrorMessage(BindingResult result) {
+		String msg = " ";
+		for (ObjectError error : result.getAllErrors()) {
+			msg += error.getDefaultMessage();
+			msg += " ";
+		}
+		return msg;
+	}
 
 	// find all public users
 	@RequestMapping(value = "/public")
@@ -62,21 +86,11 @@ public class UserController {
 
 	// add new user
 	@RequestMapping(method = RequestMethod.POST)
-	public ResponseEntity<?> addUser(@RequestBody UserDTO newUser) {
-
-		if (newUser == null) {
-			return new ResponseEntity<RESTError>(new RESTError(2, "User object is invalid."), HttpStatus.BAD_REQUEST);
-		}
-
-		if (newUser.getFirstName() == null || newUser.getLastName() == null || newUser.getUsername() == null
-				|| newUser.getPassword() == null) {
-
-			return new ResponseEntity<RESTError>(new RESTError(2, "User object is invalid."), HttpStatus.BAD_REQUEST);
-		}
-
-		if (!newUser.getPassword().equals(newUser.getRepeatedPassword())) {
-			return new ResponseEntity<RESTError>(new RESTError(2, "User passwords do not match."),
-					HttpStatus.BAD_REQUEST);
+	public ResponseEntity<?> addUser(@Valid @RequestBody UserDTO newUser, BindingResult result) {
+		if (result.hasErrors()) {
+			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
+		} else {
+			userValidator.validate(newUser, result);
 		}
 
 		UserEntity userEntity = new UserEntity();

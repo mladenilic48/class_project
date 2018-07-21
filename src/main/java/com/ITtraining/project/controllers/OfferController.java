@@ -5,9 +5,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,6 +53,15 @@ public class OfferController {
 	@Autowired
 	private BillDao billDao;
 
+	private String createErrorMessage(BindingResult result) {
+		String msg = " ";
+		for (ObjectError error : result.getAllErrors()) {
+			msg += error.getDefaultMessage();
+			msg += " ";
+		}
+		return msg;
+	}
+
 	// find all offers
 	@RequestMapping
 	@JsonView(Views.Public.class)
@@ -58,8 +71,11 @@ public class OfferController {
 
 	// add new offer
 	@RequestMapping(method = RequestMethod.POST, value = "/{categoryId}/seller/{sellerId}")
-	public ResponseEntity<?> addNewOffer(@RequestBody OfferEntity newOffer, @PathVariable Integer categoryId,
-			@PathVariable Integer sellerId) {
+	public ResponseEntity<?> addNewOffer(@Valid @RequestBody OfferEntity newOffer, BindingResult result,
+			@PathVariable Integer categoryId, @PathVariable Integer sellerId) {
+		if (result.hasErrors()) {
+			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
+		}
 
 		CategoryEntity categoryEntity = categoryRepo.findById(categoryId).get();
 		UserEntity userEntity = userRepo.findById(sellerId).get();

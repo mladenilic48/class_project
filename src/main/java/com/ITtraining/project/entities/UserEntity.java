@@ -12,6 +12,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 import com.ITtraining.project.entitiesEnum.EUserRole;
 import com.ITtraining.project.security.Views;
@@ -30,26 +33,37 @@ public class UserEntity {
 	@Column(name = "id")
 	@JsonView(Views.Public.class)
 	@JsonProperty("Id")
+	@NotNull
 	private Integer id;
 
 	@Column(name = "first_name")
 	@JsonView(Views.Private.class)
+	@NotNull(message="First name must be provided.")
 	private String firstName;
 
 	@Column(name = "last_name")
 	@JsonView(Views.Private.class)
+	@NotNull(message="Last name must be provided.")
 	private String lastName;
 
 	@Column(name = "username")
 	@JsonView(Views.Public.class)
+	@NotNull(message="Username name must be provided.")
+	@Size(min=5, max=20,  message = "Username must be between {min} and {max} characters long.")
 	private String username;
 
 	@Column(name = "password")
 	@JsonIgnore
+	@NotNull(message="Password name must be provided.")
+	// ne mora se koristiti anotacija @Size, u okviru regexp smo naveli min broj karaktera - {5,}
+	@Pattern(regexp = "^[A-Za-z0-9]{5,}$", message="Password is not valid.")
 	private String password;
 
 	@Column(name = "email")
 	@JsonView(Views.Private.class)
+	@NotNull(message = "Email must be provided.")
+	@Pattern(regexp = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
+			+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$", message="Email is not valid.")
 	private String email;
 
 	@Column(name = "user_role")

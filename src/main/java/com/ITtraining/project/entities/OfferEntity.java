@@ -15,6 +15,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import com.ITtraining.project.entitiesEnum.EOfferStatus;
 import com.ITtraining.project.security.Views;
@@ -38,10 +41,14 @@ public class OfferEntity {
 
 	@Column(name = "available_offers")
 	@JsonView(Views.Public.class)
+	@NotNull(message="Number of available offers must be provided.")
+	@Min(value=0, message="Number of available offers cannot be less than 0.")
 	private Integer availableOffers;
 
 	@Column(name = "bought_offers")
 	@JsonView(Views.Public.class)
+	@NotNull(message="Number of bought offers must be provided.")
+	@Min(value=0, message="Number of bought offers cannot be less than 0.")
 	private Integer boughtOffers;
 
 	@Column(name = "offer_created")
@@ -56,22 +63,30 @@ public class OfferEntity {
 
 	@Column(name = "offer_name")
 	@JsonView(Views.Public.class)
+	@NotNull(message="Offer name must be provided.")
 	private String offerName;
 
 	@Column(name = "offer_description")
 	@JsonView(Views.Public.class)
+	@NotNull(message="Offer description must be provided.")
+	@Size(min=5, max=20, message= "Offer description has be between {min} and {max} characters long.")
 	private String offerDescription;
 
 	@Column(name = "image_path")
 	@JsonView(Views.Public.class)
+	// kako se ovo naknadno dodaje neće biti stavljena anotacija @NotNull
 	private String imagePath;
 
 	@Column(name = "regular_price")
 	@JsonView(Views.Public.class)
+	@NotNull(message="Regular price must be provided.")
+	@Min(value=1, message="Regular price cannot be less than 1.")
 	private Double regularPrice;
 
 	@Column(name = "action_price")
 	@JsonView(Views.Public.class)
+	@NotNull(message="Action price must be provided.")
+	@Min(value=1, message="Action price cannot be less than 1.")
 	private Double actionPrice;
 
 	@Column(name = "offer_status")

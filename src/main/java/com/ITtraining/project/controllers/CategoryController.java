@@ -1,8 +1,13 @@
 package com.ITtraining.project.controllers;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
+
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,6 +35,15 @@ public class CategoryController {
 	@Autowired
 	private OfferDao offerDao;
 
+	private String createErrorMessage(BindingResult result) {
+		String msg = " ";
+		for (ObjectError error : result.getAllErrors()) {
+			msg += error.getDefaultMessage();
+			msg += " ";
+		}
+		return msg;
+	}
+
 	// find all categories
 	@RequestMapping
 	@JsonView(Views.Public.class)
@@ -39,11 +53,9 @@ public class CategoryController {
 
 	// add new category
 	@RequestMapping(method = RequestMethod.POST)
-	public ResponseEntity<?> addNewCategory(@RequestBody CategoryEntity newCategory) {
-
-		if (newCategory == null || newCategory.getCategoryName() == null || newCategory.getCategoryName().equals(" ")
-				|| newCategory.getCategoryName().equals("")) {
-			return new ResponseEntity<RESTError>(new RESTError(2, "Invalid category name."), HttpStatus.BAD_REQUEST);
+	public ResponseEntity<?> addNewCategory(@Valid @RequestBody CategoryEntity newCategory, BindingResult result) {
+		if (result.hasErrors()) {
+			return new ResponseEntity<>(createErrorMessage(result), HttpStatus.BAD_REQUEST);
 		}
 
 		return new ResponseEntity<CategoryEntity>(categoryRepo.save(newCategory), HttpStatus.OK);
